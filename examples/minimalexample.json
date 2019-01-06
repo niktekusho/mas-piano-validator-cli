@@ -1,0 +1,26 @@
+{
+    "name": "Song name",
+    "verse_list": [0],
+    "pnm_list": [
+        {
+            "text": "One",
+            "style": "monika_credits_text",
+            "notes": [
+                "D5",
+                "C5SH",
+                "B4",
+                "F4SH"
+            ]
+        },
+        {
+            "text": "Two",
+            "style": "monika_credits_text",
+            "notes": [
+                "D5",
+                "A4",
+                "D5",
+                "A4"
+            ]
+        }
+    ]
+}

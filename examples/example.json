@@ -1,0 +1,54 @@
+{
+    "name": "Song name",
+    "verse_list": [0, 5, 10, 23],
+    "pnm_list": [
+        {
+            "text": "This is a song lyric",
+            "style": "monika_credits_text",
+            "notes": [
+                "D5",
+                "C5SH",
+                "B4",
+                "F4SH",
+                "B4",
+                "C5SH",
+                "D5",
+                "E5",
+                "D5",
+                "C5SH",
+                "B4",
+                "A4",
+                "G4",
+                "D5",
+                "E5"
+            ],
+            "express": "1eub",
+            "postexpress": "1eua",
+            "vis_timeout": 2.0,
+            "verse": 0,
+            "posttext": true
+        },
+        {
+            "text": "This is the another song lyric",
+            "style": "monika_credits_text",
+            "notes": [
+                "D5",
+                "A4",
+                "D5",
+                "A4",
+                "D5",
+                "A4",
+                "D5",
+                "E5",
+                "C5SH"
+            ],
+            "postnotes": [
+                "D5",
+                "C5SH"
+            ],
+            "express": "1eub",
+            "postexpress": "1eua",
+            "ev_timeout": 1.0
+        }
+    ]
+}
