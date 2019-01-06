@@ -1,6 +1,6 @@
 # MAS Piano Songs Validator (CLI)
 
-[![Build Status](https://travis-ci.org/niktekusho/mas-piano-validator.svg?branch=master)](https://travis-ci.org/niktekusho/mas-piano-validator)
+[![Build Status](https://travis-ci.org/niktekusho/mas-piano-validator-cli.svg?branch=master)](https://travis-ci.org/niktekusho/mas-piano-validator-cli)
 
 This repository contains the CLI application to validate the piano files used in the DDLC Mod ["Monika After Story"](https://github.com/Monika-After-Story/MonikaModDev).
 
