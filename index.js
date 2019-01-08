@@ -36,24 +36,40 @@ main(cli.input);
 async function main(input) {
 	const normalizedInput = preprocessArgument(input[0]);
 	const result = await processPath(normalizedInput);
-	await postProcess(result);
+	postProcess(result);
 }
 
 function preprocessArgument(arg) {
 	return path.normalize(arg);
 }
 
-async function processPath(filePath) {
-	const pathStat = await stat(filePath);
+/**
+ * Process the file or the files inside the specified path.
+ *
+ * General algorithm:
+ *
+ * 1. If the path ends with .json process the file immediately, otherwise move on.
+ * 2. If the path is a directory (fs.stat), then process all the JSON files in the directory.
+ * 3. If none of the above is true, throw an Error saying the path could point to JSON files.
+ *
+ * @param {string} p Path to check
+ */
+async function processPath(p) {
+	if (p.endsWith('.json')) {
+		return processFile(p);
+	}
+	const pathStat = await stat(p);
 	if (pathStat.isDirectory()) {
-		return processDir(filePath);
+		return processDir(p);
 	}
-	if (filePath.endsWith('.json')) {
-		return processFile(filePath);
-	}
-	throw new Error('This application can only validate JSON files.');
+	throw new Error('The path received did not point to JSON files.');
 }
 
+/**
+ * Retrieve all the children of the directory and process all JSON files found.
+ *
+ * @param {string} dir
+ */
 async function processDir(dir) {
 	const children = await readdir(dir);
 
@@ -62,53 +78,24 @@ async function processDir(dir) {
 	const jsonChildrensPath = jsonChildrens.map(jsonChild => path.join(dir, jsonChild));
 	const childrenResultPromises = jsonChildrensPath.map(async childPath => {
 		return {
-			childPath,
-			content: await parse(childPath),
-			result: null
+			meta: {
+				src: childPath
+			},
+			content: await readFile(childPath, {encoding: 'utf8'})
 		};
 	});
 	const childrenResults = await Promise.all(childrenResultPromises);
-	childrenResults.forEach(child => {
-		child.result = validate(child.content);
-	});
-	return childrenResults;
+	return validate.all(childrenResults);
 }
 
 async function processFile(file) {
-	const parsedObject = await parse(file);
-	return validate(parsedObject);
+	const content = await readFile(file, {encoding: 'utf8'});
+	return validate(content, {src: file});
 }
 
 function postProcess(result) {
 	spinner.stop();
-	if (result === null || result === undefined) {
-		signale.error('Error');
-		return;
-	}
-	if (Array.isArray(result)) {
-		const invalidSongs = result.filter(singleRes => singleRes.result.ok === false);
-		if (invalidSongs.length === 0) {
-			signale.success('All files are valid Monika After Story piano songs!');
-		} else {
-			signale.warn('Some songs are NOT valid Monika After Story piano songs.');
-			invalidSongs.forEach(invalidSong => logResult(invalidSong));
-		}
-		return;
-	}
-
-	logResult(result);
+	signale.info(validate.prettify(result));
 }
 
-function logResult(result) {
-	console.log(result);
-	if (result.ok) {
-		signale.success('This file is a valid Monika After Story piano song!');
-	} else {
-		signale.error('This file is NOT a valid Monika After Story piano song...');
-	}
-}
-
-async function parse(filePath) {
-	const fileContent = await readFile(filePath, {encoding: 'utf8'});
-	return JSON.parse(fileContent);
-}
+module.exports = main;
