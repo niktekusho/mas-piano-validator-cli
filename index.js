@@ -1,11 +1,8 @@
-#!/usr/bin/env node
-
 const fs = require('fs');
 const path = require('path');
 const {promisify} = require('util');
 
 const validate = require('mas-piano-validator');
-const meow = require('meow');
 const ora = require('ora');
 const signale = require('signale');
 
@@ -13,34 +10,20 @@ const readFile = promisify(fs.readFile);
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 
-const cli = meow(`
-	Usage:
-	  $ mas-piano-validator <input>
-`);
-
-if (cli.input.length === 0) {
-	signale.error('Specify at least one path');
-	process.exit(1);
-}
-
-// TODO: cleanup code
-
-const spinner = ora({
-	text: 'Processing...',
-	spinner: 'balloon2'
-}).start();
-
-// TODO: pass the other input specified
-main(cli.input);
-
 async function main(input) {
-	const normalizedInput = preprocessArgument(input[0]);
+	const spinner = ora({
+		text: 'Processing...',
+		spinner: 'balloon2'
+	}).start();
+	if (input.length === 0) {
+		signale.error('Specify at least one path');
+		return;
+	}
+	// TODO: Handle other args
+	const normalizedInput = path.normalize(input[0]);
 	const result = await processPath(normalizedInput);
-	postProcess(result);
-}
-
-function preprocessArgument(arg) {
-	return path.normalize(arg);
+	spinner.stop();
+	signale.info(validate.prettify(result));
 }
 
 /**
@@ -68,7 +51,7 @@ async function processPath(p) {
 /**
  * Retrieve all the children of the directory and process all JSON files found.
  *
- * @param {string} dir
+ * @param {string} dir Directory to process
  */
 async function processDir(dir) {
 	const children = await readdir(dir);
@@ -91,11 +74,6 @@ async function processDir(dir) {
 async function processFile(file) {
 	const content = await readFile(file, {encoding: 'utf8'});
 	return validate(content, {src: file});
-}
-
-function postProcess(result) {
-	spinner.stop();
-	signale.info(validate.prettify(result));
 }
 
 module.exports = main;
