@@ -4,8 +4,8 @@
     "version": "0.1.0",
     "main": "index.js",
     "bin": {
-        "mas-piano-validator": "index.js",
-        "mas-piano-validator-cli": "index.js"
+        "mas-piano-validator": "cli.js",
+        "mas-piano-validator-cli": "cli.js"
     },
     "license": "MIT",
     "dependencies": {
@@ -49,6 +49,7 @@
         }
     ],
     "files": [
+        "cli.js",
         "schema",
         "index.d.ts"
     ],
