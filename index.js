@@ -16,7 +16,7 @@ async function main(input) {
 		spinner: 'balloon2'
 	}).start();
 	if (input.length === 0) {
-		signale.error('Specify at least one path');
+		signale.error('Specify at least one path!');
 		return;
 	}
 	// TODO: Handle other args
