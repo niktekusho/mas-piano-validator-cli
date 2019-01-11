@@ -69,4 +69,18 @@ describe('Testing CLI\'s "business logic"', () => {
 		// The passed string must span on multiple lines
 		expect(result.split(EOL).length > 1).toBeTruthy();
 	});
+
+	it('should return appropriate message when the file specified is not a json file', async () => {
+		const result = await new Promise((resolve, reject) => {
+			emitter.on('signale_error', args => {
+				resolve(args);
+			});
+			// After set timeout reject the promise
+			setTimeout(() => reject(new Error('Timeout reached!')), timeout);
+
+			main(['index.js']);
+		});
+		// The passed string must span on multiple lines
+		expect(result).toStrictEqual('The path received did not point to JSON files.');
+	});
 });
