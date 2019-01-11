@@ -30,7 +30,22 @@ async function main(input) {
 		return;
 	}
 	spinner.stop();
-	signale.info(validate.prettify(result));
+	// If, for whatever reason, result is still null, "let it die!"
+	// Both ValidationResult and ValidationResultsContainer have the ok and summary properties (they implement the same "interface")
+	printResult(result);
+	// Only ValidationResultsContainer has possible children
+	if (result.results) {
+		// Print every children
+		result.results.forEach(res => printResult(res));
+	}
+}
+
+function printResult(result) {
+	if (result.ok) {
+		signale.success(result.summary);
+	} else {
+		signale.warn(result.summary);
+	}
 }
 
 /**
@@ -43,6 +58,7 @@ async function main(input) {
  * 3. If none of the above is true, throw an Error saying the path could point to JSON files.
  *
  * @param {string} p Path to check
+ * @returns {Promise<ValidationResult|ValidationResultsContainer>} Validation result.
  */
 async function processPath(p) {
 	if (p.endsWith('.json')) {
