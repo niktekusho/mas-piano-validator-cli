@@ -21,7 +21,14 @@ async function main(input) {
 	}
 	// TODO: Handle other args
 	const normalizedInput = path.normalize(input[0]);
-	const result = await processPath(normalizedInput);
+	let result = null;
+	try {
+		result = await processPath(normalizedInput);
+	} catch (error) {
+		spinner.stop();
+		signale.error(error.message);
+		return;
+	}
 	spinner.stop();
 	signale.info(validate.prettify(result));
 }
