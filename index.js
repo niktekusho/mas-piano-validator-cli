@@ -2,21 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const {promisify} = require('util');
 
+const chalk = require('chalk');
 const validate = require('mas-piano-validator');
-const ora = require('ora');
-const signale = require('signale');
+const {Signale} = require('signale');
 
 const readFile = promisify(fs.readFile);
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 
 async function main(input) {
-	const spinner = ora({
-		text: 'Processing...',
-		spinner: 'balloon2'
-	}).start();
+	const logger = new Signale({interactive: true, scope: 'global', config: {displayScope: false}});
+	logger.await('Processing...');
 	if (input.length === 0) {
-		signale.error('Specify at least one path!');
+		logger.error('Specify at least one path!');
 		return;
 	}
 	// TODO: Handle other args
@@ -25,12 +23,36 @@ async function main(input) {
 	try {
 		result = await processPath(normalizedInput);
 	} catch (error) {
-		spinner.stop();
-		signale.error(error.message);
+		logger.error(error.message);
 		return;
 	}
-	spinner.stop();
-	signale.info(validate.prettify(result));
+	// If, for whatever reason, result is still null, "let it die!"
+	// Both ValidationResult and ValidationResultsContainer have the ok and summary properties (they implement the same "interface")
+	const globalMsg = result.summary;
+	if (result.ok) {
+		logger.success(globalMsg);
+	} else {
+		logger.warn(globalMsg);
+	}
+	// Only ValidationResultsContainer has possible children
+	if (result.results) {
+		printChildrenResults(result.results);
+	}
+}
+
+function printChildrenResults(results) {
+	const sublogger = new Signale();
+	const fileLengths = results.filter(res => res && res.meta && res.meta.src).map(res => res.meta.src.length);
+	const longestFileName = Math.max(...fileLengths);
+	results.forEach(res => {
+		// If result.meta is defined print the source of this result
+		const logObject = {message: `[${chalk.cyan.underline(res.meta.src)}]${' '.repeat(longestFileName - res.meta.src.length + 1)}${res.summary}`};
+		if (res.ok) {
+			sublogger.success(logObject);
+		} else {
+			sublogger.warn(logObject);
+		}
+	});
 }
 
 /**
@@ -43,6 +65,7 @@ async function main(input) {
  * 3. If none of the above is true, throw an Error saying the path could point to JSON files.
  *
  * @param {string} p Path to check
+ * @returns {Promise<ValidationResult|ValidationResultsContainer>} Validation result.
  */
 async function processPath(p) {
 	if (p.endsWith('.json')) {
