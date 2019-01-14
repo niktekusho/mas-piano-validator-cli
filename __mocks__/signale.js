@@ -2,8 +2,6 @@ const EventEmitter = require('events');
 
 const signale = jest.genMockFromModule('signale');
 
-console.log(signale instanceof signale.Signale);
-
 signale.Signale.prototype.emitter = new EventEmitter();
 
 // Stub every function
