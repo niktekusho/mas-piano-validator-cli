@@ -14,7 +14,7 @@ describe('Spawning the CLI in an other process', () => {
 
 describe('Testing CLI\'s "business logic"', () => {
 	// "emitter" is defined in the manual mock
-	const {emitter} = signale;
+	const {emitter} = signale.Signale.prototype;
 	const timeout = 2000;
 
 	it('should return appropriate message when no input is specified', async () => {
