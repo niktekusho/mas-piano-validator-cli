@@ -19,19 +19,17 @@ async function main(input) {
 	}
 
 	// Preprocess all arguments
-	const validationItems = [];
+	const validationItems = new validate.ValidationInputContainer();
+
 	// TODO: evaluate other ways to do this
 	/* eslint-disable no-await-in-loop */
 	for (const i of input) {
 		const normalizedInput = path.normalize(i);
-		// TODO: remove before merge
-		logger.debug(normalizedInput);
 
 		if (normalizedInput.endsWith('.json')) {
 			const content = await readFile(normalizedInput, {encoding: 'utf8'});
-			const validationItem = createValidationItem(normalizedInput, content);
-			validationItems.push(validationItem);
-			return;
+			validationItems.add(content, normalizedInput);
+			continue;
 		}
 		const pathStat = await stat(normalizedInput);
 		if (pathStat.isDirectory()) {
@@ -45,7 +43,8 @@ async function main(input) {
 			});
 			validationItems.push(...await Promise.all(childrenResultPromises));
 		} else {
-			logger.warn(`Ignoring ${normalizedInput} since it is not a JSON file.`);
+			const sublogger = new Signale();
+			sublogger.warn(`Ignoring ${normalizedInput} since it is not a JSON file.`);
 		}
 	}
 
@@ -68,15 +67,6 @@ async function main(input) {
 	if (result.results) {
 		printChildrenResults(result.results);
 	}
-}
-
-function createValidationItem(filePath, content) {
-	return {
-		meta: {
-			src: filePath
-		},
-		content
-	};
 }
 
 function printChildrenResults(results) {
