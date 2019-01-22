@@ -7,55 +7,81 @@ const validate = require('mas-piano-validator');
 const {Signale} = require('signale');
 
 const readFile = promisify(fs.readFile);
-const readdir = promisify(fs.readdir);
-const stat = promisify(fs.stat);
+
+// readFile wrapper: it resolves with path AND content
+async function wrappedReadFile(filePath) {
+	const fileContent = await readFile(filePath, {encoding: 'utf8'});
+	return {
+		content: fileContent,
+		path: filePath
+	};
+}
 
 async function main(input) {
 	const logger = new Signale({interactive: true, scope: 'global', config: {displayScope: false}});
-	logger.await('Processing...');
 	if (input.length === 0) {
 		logger.error('Specify at least one path!');
 		return;
 	}
 
-	// Preprocess all arguments
-	const validationItems = new validate.ValidationInputContainer();
+	logger.await('Processing...');
 
-	// TODO: evaluate other ways to do this
-	/* eslint-disable no-await-in-loop */
-	for (const i of input) {
-		const normalizedInput = path.normalize(i);
+	// The flow is divided into 4 tasks:
+	// 1. Input validation
+	// 2. Valid input read
+	// 3. "mas-piano-validation" step
+	// 4. Show results
 
-		if (normalizedInput.endsWith('.json')) {
-			const content = await readFile(normalizedInput, {encoding: 'utf8'});
-			validationItems.add(content, normalizedInput);
-			continue;
-		}
-		const pathStat = await stat(normalizedInput);
-		if (pathStat.isDirectory()) {
-			const children = await readdir(normalizedInput);
+	// Step 1: input validation
+	// The general idea is to filter all arguments and keep only the JSON files
 
-			// Run the validator only on json files
-			const jsonChildrens = children.filter(child => child.endsWith('.json'));
-			const jsonChildrensPath = jsonChildrens.map(jsonChild => path.join(normalizedInput, jsonChild));
-			const childrenResultPromises = jsonChildrensPath.map(async childPath => {
-				return createValidationItem(childPath, await readFile(childPath, {encoding: 'utf8'}));
-			});
-			validationItems.push(...await Promise.all(childrenResultPromises));
+	const jsonFilesPaths = [];
+	const ignoredFiles = [];
+
+	// This could be very well async: in this case, sync performance isn't as bad as it looks... 😉
+	while(input.length > 0) {
+		// Get the first current element in the array (this does side effects on the array)
+		const arg = input.shift();
+		// Is the path a directory? If it is, then evaluate the *direct* children
+		const stat = fs.statSync(arg);
+		if (stat.isDirectory()) {
+			// Get the direct children
+			const children = fs.readdirSync(arg);
+			const resolvedChildren = children.map(child => path.join(arg, child));
+			// Add the children at the end of the array
+			input.push(...resolvedChildren);
 		} else {
-			const sublogger = new Signale();
-			sublogger.warn(`Ignoring ${normalizedInput} since it is not a JSON file.`);
+			// "arg" is a path to a file
+			// Check for the extension: only json files are allowed
+			// Do regex match case insensitive
+			if (path.extname(arg).match(/json$/i)) {
+				jsonFilesPaths.push(arg);
+			} else {
+				ignoredFiles.push(`Ignoring ${arg} since it is not a JSON file.`);
+			}
 		}
 	}
 
-	if (validationItems.length === 0) {
-		// TODO: better msg
-		logger.warn('No JSON files found.');
+	// Possible breakpoint: if there are no json files to be read then tell the user and quit
+	if (jsonFilesPaths.length === 0) {
+		logger.error('No eligible files found! This application validates only \'*.json\' files.');
 		return;
 	}
 
+	// Step 2: read files contents
+	const files = await Promise.all(jsonFilesPaths.map(wrappedReadFile));
+
+	// Step 3: validation! 🎉
+	const validationItems = new validate.ValidationInputContainer();
+
+	files.forEach(file => {
+		validationItems.add(file.content, file.path);
+	});
+
 	const result = validate.all(validationItems);
 
+	// Step 4: Show the results!
+	// First the good news...
 	// Both ValidationResult and ValidationResultsContainer have the ok and summary properties (they implement the same "interface")
 	const globalMsg = result.summary;
 	if (result.ok) {
@@ -67,15 +93,18 @@ async function main(input) {
 	if (result.results) {
 		printChildrenResults(result.results);
 	}
+
+	// Then report ignored files
+	ignoredFiles.forEach(ignored => logger.warn(ignored));
 }
 
 function printChildrenResults(results) {
 	const sublogger = new Signale();
-	const fileLengths = results.filter(res => res && res.meta && res.meta.src).map(res => res.meta.src.length);
+	const fileLengths = results.map(res => res.source ? res.source.length : 0);
 	const longestFileName = Math.max(...fileLengths);
 	results.forEach(res => {
 		// If result.meta is defined print the source of this result
-		const logObject = {message: `[${chalk.cyan.underline(res.meta.src)}]${' '.repeat(longestFileName - res.meta.src.length + 1)}${res.summary}`};
+		const logObject = {message: `[${chalk.cyan.underline(res.source)}]${' '.repeat(longestFileName - res.source.length + 1)}${res.summary}`};
 		if (res.ok) {
 			sublogger.success(logObject);
 		} else {
