@@ -41,7 +41,7 @@ describe('Testing CLI\'s "business logic"', () => {
 
 			main(['examples/example.json']);
 		});
-		expect(result).toStrictEqual('This file is a valid Monika After Story piano song.');
+		expect(result).toStrictEqual('All files are valid Monika After Story piano songs.');
 	});
 
 	it('should return appropriate message when a invalid input file is specified', async () => {
@@ -52,9 +52,9 @@ describe('Testing CLI\'s "business logic"', () => {
 			// After set timeout reject the promise
 			setTimeout(() => reject(new Error('Timeout reached!')), timeout);
 
-			main(['examples/invalidsong.json']);
+			main(['examples/invalidsong.json', '.yarnclean']);
 		});
-		expect(result).toStrictEqual('This file is NOT a valid Monika After Story piano song.');
+		expect(result).toStrictEqual('All files are NOT valid Monika After Story piano songs.');
 	});
 
 	it('should return appropriate message when a directory is specified', async () => {
@@ -84,6 +84,6 @@ describe('Testing CLI\'s "business logic"', () => {
 			main(['index.js']);
 		});
 		// The passed string must span on multiple lines
-		expect(result).toStrictEqual('The path received did not point to JSON files.');
+		expect(result).toStrictEqual('No eligible files found! This application validates only \'*.json\' files.');
 	});
 });
