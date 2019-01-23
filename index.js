@@ -1,16 +1,22 @@
 const fs = require('fs');
 const path = require('path');
-const {promisify} = require('util');
+const {
+	promisify
+} = require('util');
 
 const chalk = require('chalk');
 const validate = require('mas-piano-validator');
-const {Signale} = require('signale');
+const {
+	Signale
+} = require('signale');
 
 const readFile = promisify(fs.readFile);
 
-// readFile wrapper: it resolves with path AND content
+// "readFile" wrapper: it resolves with path AND content
 async function wrappedReadFile(filePath) {
-	const fileContent = await readFile(filePath, {encoding: 'utf8'});
+	const fileContent = await readFile(filePath, {
+		encoding: 'utf8'
+	});
 	return {
 		content: fileContent,
 		path: filePath
@@ -18,7 +24,13 @@ async function wrappedReadFile(filePath) {
 }
 
 async function main(input) {
-	const logger = new Signale({interactive: true, scope: 'global', config: {displayScope: false}});
+	const logger = new Signale({
+		interactive: true,
+		scope: 'global',
+		config: {
+			displayScope: false
+		}
+	});
 	if (input.length === 0) {
 		logger.error('Specify at least one path!');
 		return;
@@ -39,7 +51,7 @@ async function main(input) {
 	const ignoredFiles = [];
 
 	// This could be very well async: in this case, sync performance isn't as bad as it looks... 😉
-	while(input.length > 0) {
+	while (input.length > 0) {
 		// Get the first current element in the array (this does side effects on the array)
 		const arg = input.shift();
 		// Is the path a directory? If it is, then evaluate the *direct* children
@@ -50,15 +62,13 @@ async function main(input) {
 			const resolvedChildren = children.map(child => path.join(arg, child));
 			// Add the children at the end of the array
 			input.push(...resolvedChildren);
-		} else {
 			// "arg" is a path to a file
 			// Check for the extension: only json files are allowed
 			// Do regex match case insensitive
-			if (path.extname(arg).match(/json$/i)) {
-				jsonFilesPaths.push(arg);
-			} else {
-				ignoredFiles.push(`Ignoring ${arg} since it is not a JSON file.`);
-			}
+		} else if (path.extname(arg).match(/json$/i)) {
+			jsonFilesPaths.push(arg);
+		} else {
+			ignoredFiles.push(`Ignoring ${arg} since it is not a JSON file.`);
 		}
 	}
 
@@ -104,7 +114,9 @@ function printChildrenResults(results) {
 	const longestFileName = Math.max(...fileLengths);
 	results.forEach(res => {
 		// If result.meta is defined print the source of this result
-		const logObject = {message: `[${chalk.cyan.underline(res.source)}]${' '.repeat(longestFileName - res.source.length + 1)}${res.summary}`};
+		const logObject = {
+			message: `[${chalk.cyan.underline(res.source)}]${' '.repeat(longestFileName - res.source.length + 1)}${res.summary}`
+		};
 		if (res.ok) {
 			sublogger.success(logObject);
 		} else {
