@@ -3464,7 +3464,7 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-mas-piano-validator@latest:
+mas-piano-validator@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/mas-piano-validator/-/mas-piano-validator-1.5.0.tgz#5f35bc4e96e206783b9de047c0decbc6bad0b9c8"
   integrity sha512-sOagldAT0wO45xGWoPm6yw1b+orC7EXT7ehYqX0KaXn/BQinR3pzZDtXu1loIlLLA++qs0cjLqqX+OIqLcSl1Q==
