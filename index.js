@@ -1,14 +1,11 @@
 const fs = require('fs');
-const path = require('path');
-const {
-	promisify
-} = require('util');
+const {extname, join} = require('path');
+const {promisify} = require('util');
 
 const chalk = require('chalk');
 const validate = require('mas-piano-validator');
-const {
-	Signale
-} = require('signale');
+const {Signale} = require('signale');
+const cwd = require('prepend-cwd');
 
 const readFile = promisify(fs.readFile);
 
@@ -54,19 +51,21 @@ async function main(input) {
 	while (input.length > 0) {
 		// Get the first current element in the array (this does side effects on the array)
 		const arg = input.shift();
+		// Normalize path
+		const normalizedPath = cwd(arg);
 		// Is the path a directory? If it is, then evaluate the *direct* children
-		const stat = fs.statSync(arg);
+		const stat = fs.statSync(normalizedPath);
 		if (stat.isDirectory()) {
 			// Get the direct children
-			const children = fs.readdirSync(arg);
-			const resolvedChildren = children.map(child => path.join(arg, child));
+			const children = fs.readdirSync(normalizedPath);
+			const resolvedChildren = children.map(child => join(normalizedPath, child));
 			// Add the children at the end of the array
 			input.push(...resolvedChildren);
 			// "arg" is a path to a file
 			// Check for the extension: only json files are allowed
 			// Do regex match case insensitive
-		} else if (path.extname(arg).match(/json$/i)) {
-			jsonFilesPaths.push(arg);
+		} else if (extname(normalizedPath).match(/json$/i)) {
+			jsonFilesPaths.push(normalizedPath);
 		} else {
 			ignoredFiles.push(`Ignoring ${arg} since it is not a JSON file.`);
 		}
