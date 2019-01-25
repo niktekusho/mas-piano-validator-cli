@@ -98,6 +98,7 @@ async function main(input) {
 	} else {
 		logger.warn(globalMsg);
 	}
+
 	// Only ValidationResultsContainer has possible children
 	if (result.results) {
 		printChildrenResults(result.results);
