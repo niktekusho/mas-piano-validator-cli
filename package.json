@@ -4,6 +4,7 @@
     "version": "0.1.0",
     "main": "index.js",
     "bin": {
+        "maspv": "cli.js",
         "mas-piano-validator": "cli.js",
         "mas-piano-validator-cli": "cli.js"
     },
