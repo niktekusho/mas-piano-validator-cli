@@ -28,7 +28,16 @@ $ npm install -g mas-piano-validator-cli
 
 ## Usage
 
-TODO
+In your console, all the following commands print the help of the module:
+
+-   `$ mas-piano-validator-cli --help`
+-   `$ mas-piano-validator --help`
+-   `$ maspv -h`
+
+The command requires at least one path, but of course, you can specify more.
+Each path can point to a directory containing MAS's Piano songs (JSON format) or to a single JSON file.
+
+**Note**: if you pass a directory, this application **does recurse on sub-directories**.
 
 ## Related
 
