@@ -6,7 +6,7 @@ const main = require('.');
 
 const cli = meow(`
 	Usage:
-	  $ mas-piano-validator <input>
+	  $ mas-piano-validator <path> …
 `);
 
 // Meow by default does not support the alias for --help, so this is the suggested solution
