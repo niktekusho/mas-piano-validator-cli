@@ -26,6 +26,8 @@ In your console, run the following command:
 $ npm install -g mas-piano-validator-cli
 ```
 
+[![Install animation](./assets/install.gif)](./assets/install.gif)
+
 ## Usage
 
 In your console, all the following commands print the help of the module:
@@ -33,6 +35,8 @@ In your console, all the following commands print the help of the module:
 -   `$ mas-piano-validator-cli --help`
 -   `$ mas-piano-validator --help`
 -   `$ maspv -h`
+
+[![Usage animation](./assets/examples.gif)](./assets/examples.gif)
 
 The command requires at least one path, but of course, you can specify more.
 Each path can point to a directory containing MAS's Piano songs (JSON format) or to a single JSON file.
