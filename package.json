@@ -51,9 +51,7 @@
         }
     ],
     "files": [
-        "cli.js",
-        "schema",
-        "index.d.ts"
+        "cli.js"
     ],
     "homepage": "https://github.com/niktekusho/mas-piano-validator-cli",
     "keywords": [
