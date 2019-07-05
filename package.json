@@ -1,7 +1,7 @@
 {
     "name": "mas-piano-validator-cli",
     "description": "This application allows you to validate the structure of piano files used in the Monika After Story DDLC Mod.",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "main": "index.js",
     "bin": {
         "maspv": "cli.js",
